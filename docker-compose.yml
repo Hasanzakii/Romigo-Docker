@@ -1,0 +1,59 @@
+version: '2.0'
+
+services:
+  postgres:
+    image: postgis/postgis:14-3.3
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "romigo_db"
+      POSTGRES_PASSWORD: 1234
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/.db:/var/lib/postgresql/data
+
+    profiles:
+      - backend
+
+  adminer:
+    image: adminer
+    ports:
+      - 8081:8080
+    networks:
+      - default
+    profiles:
+      - backend
+
+  laravel:
+    build:
+      context: .
+      dockerfile: ./Romigo/Dockerfile
+      args:
+        MOUNT_PATH: ./Romigo/composer.json
+    restart: always
+    tty: true
+    ports:
+      - 8000:8000
+    container_name: laravel-Romigo-app
+    volumes:
+      - ./Romigo:/var/www/html/Romigo
+    depends_on:
+      - postgres
+    profiles:
+      - backend
+
+  # redis:
+  #   image: redis
+  #   container_name: redis
+  #   restart: always
+  #   ports:
+  #     - 6379:6379
+  #   environment:
+  #     - ALLOW_EMPTY_PASSWORD=yes
+  #   entrypoint: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+  #   volumes:
+  #     - ./redis/data:/data
+  #   profiles:
+  #     - backend
