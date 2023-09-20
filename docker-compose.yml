@@ -1,7 +1,7 @@
 version: '2.0'
 
 services:
-  postgres:
+  romigo_db:
     image: postgis/postgis:14-3.3
     restart: always
     environment:
@@ -10,12 +10,12 @@ services:
       POSTGRES_PASSWORD: 1234
 
     ports:
-      - "5432:5432"
+      - "8082:5432"
     volumes:
       - ./docker/postgres/.db:/var/lib/postgresql/data
 
     profiles:
-      - backend
+      - romigo
 
   adminer:
     image: adminer
@@ -24,7 +24,7 @@ services:
     networks:
       - default
     profiles:
-      - backend
+      - romigo
 
   laravel:
     build:
@@ -35,14 +35,14 @@ services:
     restart: always
     tty: true
     ports:
-      - 8000:8000
+      - 8002:8002
     container_name: laravel-Romigo-app
     volumes:
       - ./Romigo:/var/www/html/Romigo
     depends_on:
-      - postgres
+      - romigo_db
     profiles:
-      - backend
+      - romigo
 
   # redis:
   #   image: redis
